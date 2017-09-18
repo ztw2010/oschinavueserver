@@ -1,2 +1,3 @@
 # oschinavueserver
 OSChina服务端
+Heroku平台的灵活性极高且支持多种编程语言。若想把程序部署到Heroku上,开发者要使用Git把程序推送到Heroku的Git服务器上。在服务器上,git push命令会自动触发安装、配置和部署程序。
