@@ -10,6 +10,12 @@ Java免费的虚拟空间真心不多，自己接触了OpenShift([https://www.op
 1. OpenShift注册后审核时间比较长，Heroku注册完成即可使用。<br>
 2. OpenShift部署Javaweb工程比价麻烦(个人觉得)而Heroku只需要关联到GitHub地址即可以在你提交代码到GitHub时由Heroku自动进行构建。<br>
 
+**Heroku对项目的要求：**<br>
+1. Heroku是基于Maven构建项目，因此用MyEclipse或者Eclipse开发项目时需要新建一个Maven项目，官网文档[https://devcenter.heroku.com/articles/getting-started-with-java#introduction](https://devcenter.heroku.com/articles/getting-started-with-java#introduction)<br>
+2. pom.xml详细内容见工程中的pom.xml<br>
+3. 在工程目录中新建Procfile文件，不能有任何后缀名，内容为web: java $JAVA_OPTS -jar target/dependency/jetty-runner.jar --port $PORT target/vueoschina.war vueoschina.war的名字要跟pom.xml中的<warName>名称一致<br>
+4. 在工程目录下新建system.properties文件，内容为：java.runtime.version=1.7指定Java版本<br>
+
 **Heroku部署Javaweb教程**：<br>
   
 1. 注册Heroku账户，地址https://www.heroku.com/ <br>
