@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vueoschina.cn.bean.BaseRequestBean;
+import com.vueoschina.cn.bean.BlogDetailBean;
 import com.vueoschina.cn.bean.CommentListRequestBean;
 import com.vueoschina.cn.bean.NewsDetailRequestBean;
 import com.vueoschina.cn.bean.NewsDetailResponseBean;
@@ -43,6 +44,10 @@ import com.vueoschina.cn.bean.favorite.FavoriteRequestBean;
 import com.vueoschina.cn.bean.follow.FollowRequestBean;
 import com.vueoschina.cn.bean.mine.MineInfoRequestBean;
 import com.vueoschina.cn.bean.mine.MineInfoResponseBean;
+import com.vueoschina.cn.bean.mine.MsgListRequestBean;
+import com.vueoschina.cn.bean.mine.UserBlogBean;
+import com.vueoschina.cn.bean.mine.UserBlogListRequestBean;
+import com.vueoschina.cn.bean.mine.UserBlogListResponseBean;
 import com.vueoschina.cn.bean.tweet.ActivelistBean;
 import com.vueoschina.cn.bean.tweet.MineTweetListRequestBean;
 import com.vueoschina.cn.bean.tweet.MineTweetResponseBean;
@@ -123,10 +128,18 @@ public class TokenServlet extends HttpServlet {
 			BaseRequestBean<FollowRequestBean> foBaseRequestBean = objectMapper.readValue(content,
 					getCollectionType(BaseRequestBean.class, FollowRequestBean.class));
 			getFollowList(request, response, foBaseRequestBean.getT());
-		} else if (BaseRequestBean.METHOD_GET_MINE_TWEET_LIST.equalsIgnoreCase(requestMethod)) {
+		} else if (BaseRequestBean.METHOD_ACTIVE_LIST.equalsIgnoreCase(requestMethod)) {
 			BaseRequestBean<MineTweetListRequestBean> miBaseRequestBean = objectMapper.readValue(content,
 					getCollectionType(BaseRequestBean.class, MineTweetListRequestBean.class));
 			getMineTweetList(request, response, miBaseRequestBean.getT());
+		} else if(BaseRequestBean.METHOD_MESSAGE_LIST.equalsIgnoreCase(requestMethod)){
+			BaseRequestBean<MsgListRequestBean> msBaseRequestBean = objectMapper.readValue(content,
+					getCollectionType(BaseRequestBean.class, MsgListRequestBean.class));
+			getMsgList(request, response, msBaseRequestBean.getT());
+		} else if(BaseRequestBean.METHOD_USER_BLOG_LIST.equalsIgnoreCase(requestMethod)){
+			BaseRequestBean<UserBlogListRequestBean> usBaseRequestBean = objectMapper.readValue(content,
+					getCollectionType(BaseRequestBean.class, UserBlogListRequestBean.class));
+			getUserBlogList(request, response, usBaseRequestBean.getT());
 		}
 	}
 
@@ -856,11 +869,11 @@ public class TokenServlet extends HttpServlet {
 			result = new String(baos.toByteArray(), "UTF-8");
 			MineInfoResponseBean mineInfoResponseBean = objectMapper.readValue(result, MineInfoResponseBean.class);
 			Object object = getMineTweetResponseBean(mineInfoRequestBean.getAccessToken(),
-					mineInfoRequestBean.getDataType(), 1, 1000, 4, mineInfoResponseBean.getUid());
-			if(object instanceof MineTweetResponseBean){
+					mineInfoRequestBean.getDataType(), 1, 1000, 4, mineInfoResponseBean.getUid(), true);
+			if (object instanceof MineTweetResponseBean) {
 				MineTweetResponseBean mineTweetResponseBean = (MineTweetResponseBean) object;
 				List<ActivelistBean> activelistBeans = mineTweetResponseBean.getActivelist();
-				if(activelistBeans != null){
+				if (activelistBeans != null) {
 					mineInfoResponseBean.setTweetCount(activelistBeans.size());
 				}
 			}
@@ -993,7 +1006,7 @@ public class TokenServlet extends HttpServlet {
 		Object object = getMineTweetResponseBean(mineTweetListRequestBean.getAccessToken(),
 				mineTweetListRequestBean.getDataType(), mineTweetListRequestBean.getPage(),
 				mineTweetListRequestBean.getPageSize(), mineTweetListRequestBean.getCatalog(),
-				mineTweetListRequestBean.getUser());
+				mineTweetListRequestBean.getUser(), false);
 		String result = objectMapper.writeValueAsString(object);
 		System.out.println("getMineTweetList result=" + result);
 		PrintWriter out = response.getWriter();
@@ -1001,7 +1014,7 @@ public class TokenServlet extends HttpServlet {
 	}
 
 	private Object getMineTweetResponseBean(String access_token, String dataType, int page, int pageSize, int catalog,
-			int user) throws IOException {
+			int user, boolean isMinInfo) throws IOException {
 		URL url = new URL("https://www.oschina.net/action/openapi/active_list");
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("POST");
@@ -1056,16 +1069,185 @@ public class TokenServlet extends HttpServlet {
 		}
 		MineTweetResponseBean mineTweetResponseBean = objectMapper.readValue(result, MineTweetResponseBean.class);
 		List<ActivelistBean> activelist = mineTweetResponseBean.getActivelist();
-		List<ActivelistBean> mineTweetList = new ArrayList<ActivelistBean>();
-		if (activelist != null && !activelist.isEmpty()) {
-			for (ActivelistBean activelistBean : activelist) {
-				if (100 == activelistBean.getObjectType()) {
-					mineTweetList.add(activelistBean);
+		if (isMinInfo) {
+			List<ActivelistBean> mineTweetList = new ArrayList<ActivelistBean>();
+			if (activelist != null && !activelist.isEmpty()) {
+				for (ActivelistBean activelistBean : activelist) {
+					if (100 == activelistBean.getObjectType()) {
+						mineTweetList.add(activelistBean);
+					}
 				}
+				mineTweetResponseBean.setActivelist(mineTweetList);
 			}
 		}
-		mineTweetResponseBean.setActivelist(mineTweetList);
 		return mineTweetResponseBean;
+	}
+	
+	private void getMsgList(HttpServletRequest request, HttpServletResponse response,
+			MsgListRequestBean msgListRequestBean) throws IOException{
+		URL url = new URL("https://www.oschina.net/action/openapi/message_list");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod(request.getMethod());
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		conn.setReadTimeout(20 * 1000);
+		conn.setConnectTimeout(20 * 1000);
+		StringBuilder sbBuilder = new StringBuilder();
+		sbBuilder.append("access_token=");
+		sbBuilder.append(msgListRequestBean.getAccessToken());
+		sbBuilder.append("&");
+		sbBuilder.append("dataType=");
+		sbBuilder.append(msgListRequestBean.getDataType());
+		sbBuilder.append("&");
+		sbBuilder.append("page=");
+		sbBuilder.append(msgListRequestBean.getPage());
+		sbBuilder.append("&");
+		sbBuilder.append("pageSize=");
+		sbBuilder.append(msgListRequestBean.getPageSize());
+		String requestContent = sbBuilder.toString();
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("User-Agent", userAgent);
+		conn.setRequestProperty("Content-Length", String.valueOf(requestContent.length()));
+		OutputStream outputStream = conn.getOutputStream();
+		outputStream.write(requestContent.getBytes());
+		outputStream.flush();
+		int code = conn.getResponseCode();
+		String result = "";
+		if (code == 200) {
+			InputStream is = conn.getInputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int len = 0;
+			byte buffer[] = new byte[1024];
+			while ((len = is.read(buffer)) != -1) {
+				baos.write(buffer, 0, len);
+			}
+			is.close();
+			baos.close();
+			result = new String(baos.toByteArray(), "UTF-8");
+		} else {
+			ErrorBean errorBean = new ErrorBean();
+			errorBean.setErrorCode(code);
+			errorBean.setErrorMsg(conn.getResponseMessage());
+			result = objectMapper.writeValueAsString(errorBean);
+		}
+		System.out.println("getMsgList result=" + result);
+		PrintWriter out = response.getWriter();
+		out.append(result);
+	}
+	
+	private void getUserBlogList(HttpServletRequest request, HttpServletResponse response,
+			UserBlogListRequestBean userBlogListRequestBean)throws IOException{
+		URL url = new URL("https://www.oschina.net/action/openapi/user_blog_list");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod(request.getMethod());
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		conn.setReadTimeout(20 * 1000);
+		conn.setConnectTimeout(20 * 1000);
+		StringBuilder sbBuilder = new StringBuilder();
+		sbBuilder.append("access_token=");
+		sbBuilder.append(userBlogListRequestBean.getAccessToken());
+		sbBuilder.append("&");
+		sbBuilder.append("dataType=");
+		sbBuilder.append(userBlogListRequestBean.getDataType());
+		sbBuilder.append("&");
+		sbBuilder.append("authoruid=");
+		sbBuilder.append(userBlogListRequestBean.getAuthoruId());
+		sbBuilder.append("&");
+		sbBuilder.append("page=");
+		sbBuilder.append(userBlogListRequestBean.getPage());
+		sbBuilder.append("&");
+		sbBuilder.append("pageSize=");
+		sbBuilder.append(userBlogListRequestBean.getPageSize());
+		String requestContent = sbBuilder.toString();
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("User-Agent", userAgent);
+		conn.setRequestProperty("Content-Length", String.valueOf(requestContent.length()));
+		OutputStream outputStream = conn.getOutputStream();
+		outputStream.write(requestContent.getBytes());
+		outputStream.flush();
+		int code = conn.getResponseCode();
+		String result = "";
+		if (code == 200) {
+			InputStream is = conn.getInputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int len = 0;
+			byte buffer[] = new byte[1024];
+			while ((len = is.read(buffer)) != -1) {
+				baos.write(buffer, 0, len);
+			}
+			is.close();
+			baos.close();
+			result = new String(baos.toByteArray(), "UTF-8");
+			UserBlogListResponseBean responseBean = objectMapper.readValue(result, UserBlogListResponseBean.class);
+			List<UserBlogBean> list = responseBean.getProjectlist();
+			if(list != null && !list.isEmpty()){
+				for (UserBlogBean userBlogBean : list) {
+					String body = getBlogBody(userBlogBean.getId(), userBlogListRequestBean.getAccessToken());
+					userBlogBean.setBody(body);
+				}
+			}
+			result = objectMapper.writeValueAsString(responseBean);
+		} else {
+			ErrorBean errorBean = new ErrorBean();
+			errorBean.setErrorCode(code);
+			errorBean.setErrorMsg(conn.getResponseMessage());
+			result = objectMapper.writeValueAsString(errorBean);
+		}
+		System.out.println("getUserBlogList result=" + result);
+		PrintWriter out = response.getWriter();
+		out.append(result);
+	}
+	
+	private String getBlogBody(Long blogId, String accessToken) throws IOException{
+		URL url = new URL("https://www.oschina.net/action/openapi/blog_detail");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("POST");
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		conn.setReadTimeout(20 * 1000);
+		conn.setConnectTimeout(20 * 1000);
+		StringBuilder sbBuilder = new StringBuilder();
+		sbBuilder.append("access_token=");
+		sbBuilder.append(accessToken);
+		sbBuilder.append("&");
+		sbBuilder.append("id=");
+		sbBuilder.append(blogId);
+		sbBuilder.append("&");
+		sbBuilder.append("dataType=");
+		sbBuilder.append("json");
+		String requestContent = sbBuilder.toString();
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("User-Agent", userAgent);
+		conn.setRequestProperty("Content-Length", String.valueOf(requestContent.length()));
+		OutputStream outputStream = conn.getOutputStream();
+		outputStream.write(requestContent.getBytes());
+		outputStream.flush();
+		int code = conn.getResponseCode();
+		String result = "";
+		if (code == 200) {
+			InputStream is = conn.getInputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int len = 0;
+			byte buffer[] = new byte[1024];
+			while ((len = is.read(buffer)) != -1) {
+				baos.write(buffer, 0, len);
+			}
+			is.close();
+			baos.close();
+			result = new String(baos.toByteArray(), "UTF-8");
+			BlogDetailBean detailBean = objectMapper.readValue(result, BlogDetailBean.class);
+			result = detailBean.getBody();
+		} else {
+			ErrorBean errorBean = new ErrorBean();
+			errorBean.setErrorCode(code);
+			errorBean.setErrorMsg(conn.getResponseMessage());
+			result = objectMapper.writeValueAsString(errorBean);
+		}
+		return result;
 	}
 
 	@Override

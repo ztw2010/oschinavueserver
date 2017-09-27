@@ -5,23 +5,24 @@ import java.io.Serializable;
 public class ActivelistBean implements Serializable {
 
 	private static final long serialVersionUID = 1195270436870638054L;
-
-	private String author;
-	private int catalog;
-	private String objectTitle;
-	private String tweetImage;
-	private int objectCatalog;
-	private ObjectReplyBean objectReply;
-	private String portrait;
-	private long authorid;
-	private String message;
-	private String pubDate;
-	private String url;
-	private int objectType;
-	private int appClient;
-	private int commentCount;
 	private long id;
+	private String portrait;
+	private String author;
+	private long authorid;
+	private int catalog;
+	private int appClient;
 	private long objectId;
+	private int objectType;
+	private int objectCatalog;
+	private String objectTitle;
+	private String objectName;
+	private String objectBody;
+	private String url;
+	private String message;
+	private String tweetImage;
+	private int commentCount;
+	private String pubDate;
+	private ObjectReplyBean objectReply;
 
 	public String getAuthor() {
 		return author;
@@ -63,12 +64,21 @@ public class ActivelistBean implements Serializable {
 		this.objectCatalog = objectCatalog;
 	}
 
-	public ObjectReplyBean getObjectReply() {
-		return objectReply;
+
+	public String getObjectName() {
+		return objectName;
 	}
 
-	public void setObjectReply(ObjectReplyBean objectReply) {
-		this.objectReply = objectReply;
+	public void setObjectName(String objectName) {
+		this.objectName = objectName;
+	}
+
+	public String getObjectBody() {
+		return objectBody;
+	}
+
+	public void setObjectBody(String objectBody) {
+		this.objectBody = objectBody;
 	}
 
 	public String getPortrait() {
@@ -151,12 +161,21 @@ public class ActivelistBean implements Serializable {
 		this.objectId = objectId;
 	}
 
+	public ObjectReplyBean getObjectReply() {
+		return objectReply;
+	}
+
+	public void setObjectReply(ObjectReplyBean objectReply) {
+		this.objectReply = objectReply;
+	}
+
 	@Override
 	public String toString() {
-		return "ActivelistBean [author=" + author + ", catalog=" + catalog + ", objectTitle=" + objectTitle
-				+ ", tweetImage=" + tweetImage + ", objectCatalog=" + objectCatalog + ", objectReply=" + objectReply
-				+ ", portrait=" + portrait + ", authorid=" + authorid + ", message=" + message + ", pubDate=" + pubDate
-				+ ", url=" + url + ", objectType=" + objectType + ", appClient=" + appClient + ", commentCount="
-				+ commentCount + ", id=" + id + ", objectId=" + objectId + "]";
+		return "ActivelistBean [id=" + id + ", portrait=" + portrait + ", author=" + author + ", authorid=" + authorid
+				+ ", catalog=" + catalog + ", appClient=" + appClient + ", objectId=" + objectId + ", objectType="
+				+ objectType + ", objectCatalog=" + objectCatalog + ", objectTitle=" + objectTitle + ", objectName="
+				+ objectName + ", objectBody=" + objectBody + ", url=" + url + ", message=" + message + ", tweetImage="
+				+ tweetImage + ", commentCount=" + commentCount + ", pubDate=" + pubDate + ", objectReply="
+				+ objectReply + "]";
 	}
 }

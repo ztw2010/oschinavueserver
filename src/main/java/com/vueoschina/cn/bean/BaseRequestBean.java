@@ -54,9 +54,19 @@ public class BaseRequestBean<T> implements Serializable{
 	public static final String METHOD_FOLLOW_LIST="getFollowList";
 	
 	/**
-	 * 获取我的动弹列表
+	 * 获取动态列表
 	 */
-	public static final String METHOD_GET_MINE_TWEET_LIST="getMineTweetList";
+	public static final String METHOD_ACTIVE_LIST="active_list";
+	
+	/**
+	 * 获取私信列表
+	 */
+	public static final String METHOD_MESSAGE_LIST="message_list";
+	
+	/**
+	 * 用户博客列表
+	 */
+	public static final String METHOD_USER_BLOG_LIST="user_blog_list";
 	
 	@JsonProperty(value = "methodName")
 	private String methodName;
