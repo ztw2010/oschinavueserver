@@ -74,7 +74,8 @@ public class TokenServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		doPost(request, response);
+		response.getWriter().append("Served at: ").append(request.getContextPath());
+		// doPost(request, response);
 	}
 
 	@Override
@@ -132,11 +133,11 @@ public class TokenServlet extends HttpServlet {
 			BaseRequestBean<MineTweetListRequestBean> miBaseRequestBean = objectMapper.readValue(content,
 					getCollectionType(BaseRequestBean.class, MineTweetListRequestBean.class));
 			getMineTweetList(request, response, miBaseRequestBean.getT());
-		} else if(BaseRequestBean.METHOD_MESSAGE_LIST.equalsIgnoreCase(requestMethod)){
+		} else if (BaseRequestBean.METHOD_MESSAGE_LIST.equalsIgnoreCase(requestMethod)) {
 			BaseRequestBean<MsgListRequestBean> msBaseRequestBean = objectMapper.readValue(content,
 					getCollectionType(BaseRequestBean.class, MsgListRequestBean.class));
 			getMsgList(request, response, msBaseRequestBean.getT());
-		} else if(BaseRequestBean.METHOD_USER_BLOG_LIST.equalsIgnoreCase(requestMethod)){
+		} else if (BaseRequestBean.METHOD_USER_BLOG_LIST.equalsIgnoreCase(requestMethod)) {
 			BaseRequestBean<UserBlogListRequestBean> usBaseRequestBean = objectMapper.readValue(content,
 					getCollectionType(BaseRequestBean.class, UserBlogListRequestBean.class));
 			getUserBlogList(request, response, usBaseRequestBean.getT());
@@ -1082,9 +1083,9 @@ public class TokenServlet extends HttpServlet {
 		}
 		return mineTweetResponseBean;
 	}
-	
+
 	private void getMsgList(HttpServletRequest request, HttpServletResponse response,
-			MsgListRequestBean msgListRequestBean) throws IOException{
+			MsgListRequestBean msgListRequestBean) throws IOException {
 		URL url = new URL("https://www.oschina.net/action/openapi/message_list");
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod(request.getMethod());
@@ -1135,9 +1136,9 @@ public class TokenServlet extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		out.append(result);
 	}
-	
+
 	private void getUserBlogList(HttpServletRequest request, HttpServletResponse response,
-			UserBlogListRequestBean userBlogListRequestBean)throws IOException{
+			UserBlogListRequestBean userBlogListRequestBean) throws IOException {
 		URL url = new URL("https://www.oschina.net/action/openapi/user_blog_list");
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod(request.getMethod());
@@ -1183,7 +1184,7 @@ public class TokenServlet extends HttpServlet {
 			result = new String(baos.toByteArray(), "UTF-8");
 			UserBlogListResponseBean responseBean = objectMapper.readValue(result, UserBlogListResponseBean.class);
 			List<UserBlogBean> list = responseBean.getProjectlist();
-			if(list != null && !list.isEmpty()){
+			if (list != null && !list.isEmpty()) {
 				for (UserBlogBean userBlogBean : list) {
 					String body = getBlogBody(userBlogBean.getId(), userBlogListRequestBean.getAccessToken());
 					userBlogBean.setBody(body);
@@ -1200,8 +1201,8 @@ public class TokenServlet extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		out.append(result);
 	}
-	
-	private String getBlogBody(Long blogId, String accessToken) throws IOException{
+
+	private String getBlogBody(Long blogId, String accessToken) throws IOException {
 		URL url = new URL("https://www.oschina.net/action/openapi/blog_detail");
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("POST");
