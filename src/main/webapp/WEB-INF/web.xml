@@ -24,19 +24,8 @@
 		<servlet-name>tokenAction</servlet-name>
 		<servlet-class>com.vueoschina.cn.openapi.TokenServlet</servlet-class>
 	</servlet>
-	<servlet>
-		<description>
-		</description>
-		<display-name>dd</display-name>
-		<servlet-name>dd</servlet-name>
-		<servlet-class>com.vueoschina.cn.openapi.dd</servlet-class>
-	</servlet>
 	<servlet-mapping>
 		<servlet-name>tokenAction</servlet-name>
 		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>dd</servlet-name>
-		<url-pattern>/dd</url-pattern>
 	</servlet-mapping>
 </web-app>
