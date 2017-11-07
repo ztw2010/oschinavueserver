@@ -38,6 +38,8 @@ import com.vueoschina.cn.bean.NewsListRequestBean;
 import com.vueoschina.cn.bean.NewsType0ResponseBean;
 import com.vueoschina.cn.bean.NewsType3ResponseBean;
 import com.vueoschina.cn.bean.PubCommentRequestBean;
+import com.vueoschina.cn.bean.SoftwareCategoryListResponseBean;
+import com.vueoschina.cn.bean.SoftwareCategoryRequestBean;
 import com.vueoschina.cn.bean.TokenRequestBean;
 import com.vueoschina.cn.bean.error.ErrorBean;
 import com.vueoschina.cn.bean.favorite.FavoriteRequestBean;
@@ -141,6 +143,10 @@ public class TokenServlet extends HttpServlet {
 			BaseRequestBean<UserBlogListRequestBean> usBaseRequestBean = objectMapper.readValue(content,
 					getCollectionType(BaseRequestBean.class, UserBlogListRequestBean.class));
 			getUserBlogList(request, response, usBaseRequestBean.getT());
+		} else if (BaseRequestBean.METHOD_PROJECT_CATALOG_LIST.equalsIgnoreCase(requestMethod)) {
+			BaseRequestBean<SoftwareCategoryRequestBean> soBaseRequestBean = objectMapper.readValue(content,
+					getCollectionType(BaseRequestBean.class, SoftwareCategoryRequestBean.class));
+			getSoftCategory(request, response, soBaseRequestBean.getT());
 		}
 	}
 
@@ -1249,6 +1255,56 @@ public class TokenServlet extends HttpServlet {
 			result = objectMapper.writeValueAsString(errorBean);
 		}
 		return result;
+	}
+
+	private void getSoftCategory(HttpServletRequest request, HttpServletResponse response,
+			SoftwareCategoryRequestBean softwareCategoryListResponseBean) throws IOException {
+		URL url = new URL("https://www.oschina.net/action/openapi/project_catalog_list");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod(request.getMethod());
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		conn.setReadTimeout(20 * 1000);
+		conn.setConnectTimeout(20 * 1000);
+		StringBuilder sbBuilder = new StringBuilder();
+		sbBuilder.append("access_token=");
+		sbBuilder.append(softwareCategoryListResponseBean.getAccessToken());
+		sbBuilder.append("&");
+		sbBuilder.append("dataType=");
+		sbBuilder.append(softwareCategoryListResponseBean.getDataType());
+		sbBuilder.append("&");
+		sbBuilder.append("tag=");
+		sbBuilder.append(softwareCategoryListResponseBean.getTag());
+		String requestContent = sbBuilder.toString();
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("User-Agent", userAgent);
+		conn.setRequestProperty("Content-Length", String.valueOf(requestContent.length()));
+		OutputStream outputStream = conn.getOutputStream();
+		outputStream.write(requestContent.getBytes());
+		outputStream.flush();
+		int code = conn.getResponseCode();
+		String result = "";
+		if (code == 200) {
+			InputStream is = conn.getInputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int len = 0;
+			byte buffer[] = new byte[1024];
+			while ((len = is.read(buffer)) != -1) {
+				baos.write(buffer, 0, len);
+			}
+			is.close();
+			baos.close();
+			result = new String(baos.toByteArray(), "UTF-8");
+		} else {
+			ErrorBean errorBean = new ErrorBean();
+			errorBean.setErrorCode(code);
+			errorBean.setErrorMsg(conn.getResponseMessage());
+			result = objectMapper.writeValueAsString(errorBean);
+		}
+		System.out.println("getSoftCategory result=" + result);
+		PrintWriter out = response.getWriter();
+		out.append(result);
 	}
 
 	@Override
