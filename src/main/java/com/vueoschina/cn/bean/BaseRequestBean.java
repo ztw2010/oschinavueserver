@@ -73,6 +73,16 @@ public class BaseRequestBean<T> implements Serializable{
 	 */
 	public static final String METHOD_PROJECT_CATALOG_LIST ="project_catalog_list";
 	
+	/**
+	 * 获取软件分类子列表
+	 */
+	public static final String METHOD_PROJECT_TAG_LIST ="project_tag_list";
+	
+	/**
+	 * 软件分类下的的软件列表
+	 */
+	public static final String METHOD_PROJECT_LIST ="project_list";
+	
 	@JsonProperty(value = "methodName")
 	private String methodName;
 	

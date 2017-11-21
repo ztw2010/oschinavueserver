@@ -37,6 +37,8 @@ import com.vueoschina.cn.bean.NewsDetailResponseBean;
 import com.vueoschina.cn.bean.NewsListRequestBean;
 import com.vueoschina.cn.bean.NewsType0ResponseBean;
 import com.vueoschina.cn.bean.NewsType3ResponseBean;
+import com.vueoschina.cn.bean.ProjectListRequestBean;
+import com.vueoschina.cn.bean.ProjectTagListRequestBean;
 import com.vueoschina.cn.bean.PubCommentRequestBean;
 import com.vueoschina.cn.bean.SoftwareCategoryListResponseBean;
 import com.vueoschina.cn.bean.SoftwareCategoryRequestBean;
@@ -147,6 +149,14 @@ public class TokenServlet extends HttpServlet {
 			BaseRequestBean<SoftwareCategoryRequestBean> soBaseRequestBean = objectMapper.readValue(content,
 					getCollectionType(BaseRequestBean.class, SoftwareCategoryRequestBean.class));
 			getSoftCategory(request, response, soBaseRequestBean.getT());
+		} else if (BaseRequestBean.METHOD_PROJECT_LIST.equalsIgnoreCase(requestMethod)) {
+			BaseRequestBean<ProjectListRequestBean> soBaseRequestBean = objectMapper.readValue(content,
+					getCollectionType(BaseRequestBean.class, ProjectListRequestBean.class));
+			getProjectList(request, response, soBaseRequestBean.getT());
+		} else if(BaseRequestBean.METHOD_PROJECT_TAG_LIST.equalsIgnoreCase(requestMethod)){
+			BaseRequestBean<ProjectTagListRequestBean> soBaseRequestBean = objectMapper.readValue(content,
+					getCollectionType(BaseRequestBean.class, ProjectTagListRequestBean.class));
+			getProjectTagList(request, response, soBaseRequestBean.getT());
 		}
 	}
 
@@ -1306,6 +1316,111 @@ public class TokenServlet extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		out.append(result);
 	}
+	
+	private void getProjectList(HttpServletRequest request, HttpServletResponse response,
+			ProjectListRequestBean projectListRequestBean) throws IOException {
+		URL url = new URL("https://www.oschina.net/action/openapi/project_list");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod(request.getMethod());
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		conn.setReadTimeout(20 * 1000);
+		conn.setConnectTimeout(20 * 1000);
+		StringBuilder sbBuilder = new StringBuilder();
+		sbBuilder.append("access_token=");
+		sbBuilder.append(projectListRequestBean.getAccessToken());
+		sbBuilder.append("&");
+		sbBuilder.append("dataType=");
+		sbBuilder.append(projectListRequestBean.getDataType());
+		sbBuilder.append("&");
+		sbBuilder.append("type=");
+		sbBuilder.append(projectListRequestBean.getType());
+		sbBuilder.append("&");
+		sbBuilder.append("page=");
+		sbBuilder.append(projectListRequestBean.getPage());
+		String requestContent = sbBuilder.toString();
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("User-Agent", userAgent);
+		conn.setRequestProperty("Content-Length", String.valueOf(requestContent.length()));
+		OutputStream outputStream = conn.getOutputStream();
+		outputStream.write(requestContent.getBytes());
+		outputStream.flush();
+		int code = conn.getResponseCode();
+		String result = "";
+		if (code == 200) {
+			InputStream is = conn.getInputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int len = 0;
+			byte buffer[] = new byte[1024];
+			while ((len = is.read(buffer)) != -1) {
+				baos.write(buffer, 0, len);
+			}
+			is.close();
+			baos.close();
+			result = new String(baos.toByteArray(), "UTF-8");
+		} else {
+			ErrorBean errorBean = new ErrorBean();
+			errorBean.setErrorCode(code);
+			errorBean.setErrorMsg(conn.getResponseMessage());
+			result = objectMapper.writeValueAsString(errorBean);
+		}
+		System.out.println("getProjectList result=" + result);
+		PrintWriter out = response.getWriter();
+		out.append(result);
+	}
+	
+	private void getProjectTagList(HttpServletRequest request, HttpServletResponse response,
+			ProjectTagListRequestBean projectListRequestBean) throws IOException {
+		URL url = new URL("https://www.oschina.net/action/openapi/project_tag_list");
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod(request.getMethod());
+		conn.setDoInput(true);
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		conn.setReadTimeout(20 * 1000);
+		conn.setConnectTimeout(20 * 1000);
+		StringBuilder sbBuilder = new StringBuilder();
+		sbBuilder.append("access_token=");
+		sbBuilder.append(projectListRequestBean.getAccessToken());
+		sbBuilder.append("&");
+		sbBuilder.append("dataType=");
+		sbBuilder.append(projectListRequestBean.getDataType());
+		sbBuilder.append("&");
+		sbBuilder.append("tag=");
+		sbBuilder.append(projectListRequestBean.getTag());
+		String requestContent = sbBuilder.toString();
+		conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		conn.setRequestProperty("User-Agent", userAgent);
+		conn.setRequestProperty("Content-Length", String.valueOf(requestContent.length()));
+		OutputStream outputStream = conn.getOutputStream();
+		outputStream.write(requestContent.getBytes());
+		outputStream.flush();
+		int code = conn.getResponseCode();
+		String result = "";
+		if (code == 200) {
+			InputStream is = conn.getInputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int len = 0;
+			byte buffer[] = new byte[1024];
+			while ((len = is.read(buffer)) != -1) {
+				baos.write(buffer, 0, len);
+			}
+			is.close();
+			baos.close();
+			result = new String(baos.toByteArray(), "UTF-8");
+		} else {
+			ErrorBean errorBean = new ErrorBean();
+			errorBean.setErrorCode(code);
+			errorBean.setErrorMsg(conn.getResponseMessage());
+			result = objectMapper.writeValueAsString(errorBean);
+		}
+		System.out.println("getProjectTagList result=" + result);
+		PrintWriter out = response.getWriter();
+		out.append(result);
+	}
+	
+	
 
 	@Override
 	public void destroy() {
