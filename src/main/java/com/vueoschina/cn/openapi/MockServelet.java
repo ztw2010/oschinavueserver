@@ -71,7 +71,7 @@ public class MockServelet extends HttpServlet {
 			customDetailBean.setDistribuite("上海市徐汇区");
 			customDetailBean.setPreVisitTime("2017年5月31号");
 			List<StorePicBean> storePics = new ArrayList<StorePicBean>();
-			for (int i = 0; i < 2; i++) {
+			for (int i = 0; i < 1; i++) {
 				StorePicBean storePic = new StorePicBean();
 				storePics.add(storePic);
 			}
