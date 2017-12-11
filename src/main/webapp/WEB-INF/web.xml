@@ -24,8 +24,19 @@
 		<servlet-name>tokenAction</servlet-name>
 		<servlet-class>com.vueoschina.cn.openapi.TokenServlet</servlet-class>
 	</servlet>
+	<servlet>
+		<description>
+		</description>
+		<display-name>MockServelet</display-name>
+		<servlet-name>MockServelet</servlet-name>
+		<servlet-class>com.vueoschina.cn.openapi.MockServelet</servlet-class>
+	</servlet>
 	<servlet-mapping>
 		<servlet-name>tokenAction</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/tokenAction</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>MockServelet</servlet-name>
+		<url-pattern>/mockdata</url-pattern>
 	</servlet-mapping>
 </web-app>
